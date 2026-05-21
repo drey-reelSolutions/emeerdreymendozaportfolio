@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crazy Inasal — Authentic Filipino Charcoal Grill | St. Albert, Alberta</title>
+  <meta name="description" content="Crazy Inasal serves authentic Filipino charcoal-grilled chicken and dishes in St. Albert, Alberta. Order online for pickup or delivery." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --amber: #D97706;
+      --amber-light: #F59E0B;
+      --amber-dark: #B45309;
+      --red: #9E2A0B;
+      --red-light: #C23812;
+      --dark: #0D0602;
+      --dark-2: #1A0A04;
+      --dark-3: #251208;
+      --dark-4: #2D1A0E;
+      --border: rgba(255,255,255,0.08);
+      --border-amber: rgba(217,119,6,0.25);
+      --text: #F5E6D0;
+      --text-muted: #A88B72;
+      --font: 'Inter', sans-serif;
+      --font-display: 'Playfair Display', Georgia, serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--dark); color: var(--text); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ─── CART FLOATING BUTTON ─── */
+    .cart-float {
+      position: fixed; bottom: 28px; right: 28px; z-index: 200;
+      background: var(--amber); color: #fff;
+      width: 60px; height: 60px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; cursor: pointer;
+      box-shadow: 0 8px 32px rgba(217,119,6,0.45);
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
+    }
+    .cart-float:hover { transform: scale(1.08); box-shadow: 0 12px 40px rgba(217,119,6,0.55); }
+    .cart-badge {
+      position: absolute; top: -4px; right: -4px;
+      background: var(--red); color: #fff;
+      width: 22px; height: 22px; border-radius: 50%;
+      font-size: 11px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      display: none;
+    }
+
+    /* ─── CART DRAWER ─── */
+    .cart-overlay {
+      display: none; position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    }
+    .cart-overlay.open { display: block; }
+    .cart-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 100%; max-width: 420px; z-index: 310;
+      background: var(--dark-2); border-left: 1px solid var(--border-amber);
+      display: flex; flex-direction: column;
+      transform: translateX(100%); transition: transform 0.3s ease;
+    }
+    .cart-drawer.open { transform: translateX(0); }
+    .cart-header {
+      padding: 24px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .cart-header h3 { font-size: 18px; font-weight: 800; color: #fff; }
+    .cart-close {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 22px; cursor: pointer; transition: color 0.2s;
+    }
+    .cart-close:hover { color: #fff; }
+    .cart-items { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .cart-item {
+      background: var(--dark-3); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    }
+    .cart-item-name { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+    .cart-item-price { font-size: 12px; color: var(--amber); font-weight: 600; }
+    .qty-controls { display: flex; align-items: center; gap: 10px; }
+    .qty-btn {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--dark-4); border: 1px solid var(--border);
+      color: var(--text); font-size: 14px; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .qty-btn:hover { background: var(--amber); color: #fff; border-color: var(--amber); }
+    .qty-num { font-size: 14px; font-weight: 800; color: #fff; min-width: 16px; text-align: center; }
+    .cart-empty { text-align: center; padding: 48px 24px; color: var(--text-muted); font-size: 14px; }
+    .cart-footer { padding: 20px; border-top: 1px solid var(--border); }
+    .cart-line { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+    .cart-total { display: flex; justify-content: space-between; font-size: 17px; font-weight: 900; color: #fff; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .cart-total span:last-child { color: var(--amber); }
+    .btn-checkout {
+      width: 100%; margin-top: 16px; padding: 15px;
+      background: var(--red); color: #fff; border: none;
+      border-radius: 10px; font-family: var(--font);
+      font-size: 15px; font-weight: 800; cursor: pointer;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      transition: background 0.2s;
+    }
+    .btn-checkout:hover { background: var(--red-light); }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(13,6,2,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto; padding: 0 24px;
+      height: 68px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; }
+    .nav-brand-icon { font-size: 26px; }
+    .nav-brand-name {
+      font-family: var(--font-display); font-size: 20px; font-weight: 900;
+      color: #fff; letter-spacing: -0.01em;
+    }
+    .nav-brand-name span { color: var(--amber); }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a { font-size: 13px; font-weight: 600; color: var(--text-muted); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--amber); }
+    .btn-order {
+      background: var(--red); color: #fff;
+      padding: 9px 20px; border-radius: 8px;
+      font-size: 13px; font-weight: 700; border: none;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-order:hover { background: var(--red-light); }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-muted); font-weight: 600;
+    }
+    .back-link:hover { color: var(--amber); }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      padding: 100px 24px 80px;
+      background: radial-gradient(ellipse at 30% 50%, rgba(158,42,11,0.15) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 20%, rgba(217,119,6,0.1) 0%, transparent 50%),
+                  var(--dark);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute;
+      top: 0; right: 0; width: 55%; height: 100%;
+      background: radial-gradient(ellipse at center, rgba(26,10,4,0.8) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner { max-width: 1100px; margin: 0 auto; width: 100%; position: relative; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(217,119,6,0.1); border: 1px solid var(--border-amber);
+      color: var(--amber-light); font-size: 11px; font-weight: 700;
+      padding: 6px 14px; border-radius: 50px; letter-spacing: 0.08em;
+      text-transform: uppercase; margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(44px, 7vw, 88px);
+      font-weight: 900; line-height: 1.0;
+      letter-spacing: -0.02em; color: #fff;
+      margin-bottom: 8px;
+    }
+    .hero h1 .accent { color: var(--amber); }
+    .hero-tagline {
+      font-size: clamp(16px, 2.5vw, 24px); color: var(--text-muted);
+      font-weight: 400; margin-bottom: 20px; font-style: italic;
+    }
+    .hero-sub {
+      font-size: 16px; color: var(--text-muted);
+      max-width: 500px; margin-bottom: 40px; line-height: 1.7;
+    }
+    .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 56px; }
+    .btn-cta-primary {
+      background: var(--red); color: #fff;
+      padding: 15px 32px; border-radius: 10px;
+      font-size: 15px; font-weight: 800; border: none; cursor: pointer;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      box-shadow: 0 4px 20px rgba(158,42,11,0.4);
+      transition: background 0.2s, transform 0.15s;
+      font-family: var(--font);
+    }
+    .btn-cta-primary:hover { background: var(--red-light); transform: translateY(-2px); }
+    .btn-cta-secondary {
+      background: transparent; color: #fff;
+      padding: 15px 32px; border-radius: 10px;
+      font-size: 15px; font-weight: 700; border: 1.5px solid var(--border);
+      cursor: pointer; transition: border-color 0.2s, color 0.2s;
+      font-family: var(--font);
+    }
+    .btn-cta-secondary:hover { border-color: var(--amber); color: var(--amber); }
+    .hero-info { display: flex; gap: 24px; flex-wrap: wrap; }
+    .hero-info-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+    .hero-emoji { font-size: 18px; }
+    .hero-flame {
+      position: absolute; right: 5%; top: 50%; transform: translateY(-50%);
+      font-size: clamp(100px, 15vw, 180px); opacity: 0.15;
+      filter: drop-shadow(0 0 40px rgba(217,119,6,0.3));
+      pointer-events: none; user-select: none;
+    }
+
+    /* ─── DIVIDER ─── */
+    .divider {
+      height: 1px; background: linear-gradient(to right, transparent, var(--border-amber), transparent);
+    }
+
+    /* ─── ABOUT STRIP ─── */
+    .about-strip {
+      background: var(--dark-2); padding: 56px 24px;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    }
+    .about-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+    }
+    .about-eyebrow { font-size: 11px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; }
+    .about-title { font-family: var(--font-display); font-size: clamp(24px, 3vw, 36px); font-weight: 900; color: #fff; margin-bottom: 16px; line-height: 1.2; }
+    .about-text { font-size: 15px; color: var(--text-muted); line-height: 1.75; margin-bottom: 24px; }
+    .about-highlights { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .highlight { background: var(--dark-3); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .highlight-icon { font-size: 22px; margin-bottom: 8px; }
+    .highlight-title { font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    .highlight-text { font-size: 12px; color: var(--text-muted); }
+
+    /* ─── MENU ─── */
+    .menu-section { padding: 80px 24px; }
+    .menu-inner { max-width: 1100px; margin: 0 auto; }
+    .menu-header { margin-bottom: 40px; }
+    .menu-eyebrow { font-size: 11px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; }
+    .menu-title { font-family: var(--font-display); font-size: clamp(28px, 4vw, 44px); font-weight: 900; color: #fff; margin-bottom: 8px; }
+    .menu-sub { font-size: 15px; color: var(--text-muted); }
+    .menu-cats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 36px; }
+    .cat-btn {
+      background: var(--dark-3); border: 1px solid var(--border);
+      color: var(--text-muted); font-size: 13px; font-weight: 600;
+      padding: 8px 18px; border-radius: 50px; cursor: pointer;
+      transition: all 0.2s; font-family: var(--font);
+    }
+    .cat-btn:hover, .cat-btn.active {
+      background: var(--amber); border-color: var(--amber); color: #fff;
+    }
+    .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .menu-item {
+      background: var(--dark-2); border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .menu-item:hover { border-color: var(--border-amber); box-shadow: 0 4px 20px rgba(217,119,6,0.1); }
+    .menu-item-cat {
+      display: inline-block; background: rgba(217,119,6,0.1);
+      border: 1px solid var(--border-amber); color: var(--amber);
+      font-size: 9px; font-weight: 800; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 2px 8px; border-radius: 4px;
+      margin-bottom: 6px;
+    }
+    .menu-item-name { font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+    .menu-item-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+    .menu-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0; }
+    .menu-price { font-size: 18px; font-weight: 900; color: var(--amber); white-space: nowrap; }
+    .add-btn {
+      background: var(--red); color: #fff; border: none;
+      padding: 8px 16px; border-radius: 8px;
+      font-family: var(--font); font-size: 12px; font-weight: 700;
+      cursor: pointer; white-space: nowrap;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .add-btn:hover { background: var(--red-light); transform: scale(1.04); }
+    .menu-note {
+      margin-top: 28px; background: rgba(217,119,6,0.06);
+      border: 1px solid var(--border-amber); border-radius: 12px;
+      padding: 16px 20px; font-size: 13px; color: var(--text-muted); line-height: 1.6;
+    }
+    .menu-note strong { color: var(--amber-light); }
+
+    /* ─── ORDER MODAL ─── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 400;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--dark-2); border: 1px solid var(--border-amber);
+      border-radius: 20px; width: 100%; max-width: 520px;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-top {
+      padding: 24px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-top h3 { font-size: 18px; font-weight: 900; color: #fff; }
+    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
+    .modal-close:hover { color: #fff; }
+    .modal-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .receipt-box {
+      display: none; background: #fff; color: #1a1a1a;
+      border-radius: 12px; padding: 20px; font-family: 'Courier New', monospace;
+      font-size: 12px; line-height: 1.6; margin-top: 12px;
+    }
+    .receipt-box.show { display: block; }
+    .receipt-header { text-align: center; border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 12px; }
+    .receipt-store { font-size: 15px; font-weight: 900; letter-spacing: 0.05em; }
+    .receipt-addr { font-size: 10px; color: #666; }
+    .receipt-line { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .receipt-divider { border: none; border-top: 1px dashed #ccc; margin: 10px 0; }
+    .receipt-total { display: flex; justify-content: space-between; font-weight: 900; font-size: 14px; }
+    .receipt-thank { text-align: center; font-size: 11px; color: #888; margin-top: 12px; font-style: italic; }
+
+    .field-label { font-size: 11px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .field-input {
+      width: 100%; padding: 11px 14px;
+      background: var(--dark-3); border: 1px solid var(--border);
+      border-radius: 8px; color: #fff; font-family: var(--font);
+      font-size: 13px; transition: border-color 0.2s; outline: none;
+    }
+    .field-input:focus { border-color: var(--amber); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .toggle-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .toggle-btn {
+      padding: 10px 8px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--dark-3);
+      color: var(--text-muted); font-family: var(--font);
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      text-align: center; transition: all 0.2s;
+    }
+    .toggle-btn.active { background: var(--amber); border-color: var(--amber); color: #fff; }
+    .modal-summary { background: var(--dark-3); border-radius: 10px; padding: 14px; }
+    .modal-summary-line { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+    .modal-summary-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 900; color: #fff; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .modal-summary-total span:last-child { color: var(--amber); }
+    .process-btn {
+      width: 100%; padding: 15px; background: var(--red);
+      color: #fff; border: none; border-radius: 10px;
+      font-family: var(--font); font-size: 15px; font-weight: 800;
+      cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;
+      transition: background 0.2s;
+    }
+    .process-btn:hover { background: var(--red-light); }
+
+    /* ─── LOCATION ─── */
+    .location-section { background: var(--dark-2); padding: 80px 24px; border-top: 1px solid var(--border); }
+    .location-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+    .location-eyebrow { font-size: 11px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; }
+    .location-title { font-family: var(--font-display); font-size: 32px; font-weight: 900; color: #fff; margin-bottom: 20px; }
+    .location-details { display: flex; flex-direction: column; gap: 16px; }
+    .location-item { display: flex; align-items: flex-start; gap: 14px; }
+    .location-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+    .location-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .location-value { font-size: 15px; font-weight: 600; color: #fff; margin-top: 2px; }
+    .location-value a { color: var(--amber-light); }
+    .map-placeholder {
+      background: var(--dark-3); border: 1px solid var(--border-amber);
+      border-radius: 16px; height: 280px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: var(--text-muted); gap: 12px;
+    }
+    .map-placeholder span { font-size: 40px; }
+    .map-placeholder p { font-size: 13px; font-weight: 600; }
+    .map-placeholder small { font-size: 11px; color: var(--amber); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--dark); border-top: 1px solid var(--border);
+      padding: 36px 24px; text-align: center;
+    }
+    .footer-brand {
+      font-family: var(--font-display); font-size: 22px; font-weight: 900;
+      color: #fff; margin-bottom: 6px;
+    }
+    .footer-brand span { color: var(--amber); }
+    .footer-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+    .footer-back { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--amber); font-weight: 600; }
+    .footer-copy { font-size: 12px; color: var(--text-muted); margin-top: 12px; }
+
+    /* ─── HIDDEN ─── */
+    .hidden { display: none !important; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .menu-grid { grid-template-columns: 1fr; }
+      .about-inner { grid-template-columns: 1fr; gap: 32px; }
+      .location-inner { grid-template-columns: 1fr; gap: 32px; }
+      .nav-links { display: none; }
+      .hero-flame { display: none; }
+      .field-row { grid-template-columns: 1fr; }
+      .about-highlights { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 500px) {
+      .hero h1 { font-size: 38px; }
+      .about-highlights { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CART FLOAT -->
+  <button class="cart-float" onclick="toggleCart()" aria-label="View Cart">
+    🛒
+    <span class="cart-badge" id="cartBadge">0</span>
+  </button>
+
+  <!-- CART DRAWER -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h3>🛒 Your Order</h3>
+      <button class="cart-close" onclick="toggleCart()">×</button>
+    </div>
+    <div class="cart-items" id="cartItemsList">
+      <div class="cart-empty" id="cartEmpty">Your basket is empty. Add items from the menu!</div>
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none;">
+      <div class="cart-line"><span>Subtotal</span><span id="cartSubtotal">$0.00</span></div>
+      <div class="cart-line" id="deliveryLine" style="display:none;"><span>Delivery Fee</span><span>$4.50</span></div>
+      <div class="cart-line"><span>GST (5%)</span><span id="cartTax">$0.00</span></div>
+      <div class="cart-total"><span>Total</span><span id="cartTotal">$0.00</span></div>
+      <button class="btn-checkout" onclick="openOrderModal()">Proceed to Checkout</button>
+    </div>
+  </div>
+
+  <!-- ORDER MODAL -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal-box">
+      <div class="modal-top">
+        <h3>Complete Your Order</h3>
+        <button class="modal-close" onclick="closeOrderModal()">×</button>
+      </div>
+      <div class="modal-body">
+
+        <div>
+          <div class="field-label">Your Name</div>
+          <input class="field-input" type="text" id="custName" placeholder="Full name" />
+        </div>
+        <div class="field-row">
+          <div>
+            <div class="field-label">Phone</div>
+            <input class="field-input" type="tel" id="custPhone" placeholder="780-555-0000" />
+          </div>
+          <div>
+            <div class="field-label">Email</div>
+            <input class="field-input" type="email" id="custEmail" placeholder="you@email.com" />
+          </div>
+        </div>
+
+        <div>
+          <div class="field-label">Fulfillment</div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="pickupBtn" onclick="setRoute('pickup')">📍 Store Pickup</button>
+            <button class="toggle-btn" id="deliveryBtn" onclick="setRoute('delivery')">🚴 Delivery (+$4.50)</button>
+          </div>
+        </div>
+
+        <div id="addrField" class="hidden">
+          <div class="field-label">Delivery Address</div>
+          <input class="field-input" type="text" id="custAddr" placeholder="Street address, St. Albert" />
+        </div>
+
+        <div>
+          <div class="field-label">Payment</div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="cashBtn" onclick="setPayment('cash')">💵 Cash / Card</button>
+            <button class="toggle-btn" id="onlineBtn" onclick="setPayment('online')">🌐 Pay Online</button>
+          </div>
+        </div>
+
+        <div class="modal-summary" id="modalSummary"></div>
+
+        <button class="process-btn" onclick="processOrder()">Place Order & Get Receipt</button>
+
+        <div class="receipt-box" id="receiptBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <div class="nav-brand">
+        <span class="nav-brand-icon">🍗</span>
+        <span class="nav-brand-name">Crazy <span>Inasal</span></span>
+      </div>
+      <div class="nav-links">
+        <a href="#about">Our Story</a>
+        <a href="#menu">Menu</a>
+        <a href="#location">Find Us</a>
+        <button class="btn-order" onclick="document.getElementById('menu').scrollIntoView({behavior:'smooth'})">Order Now</button>
+      </div>
+      <a href="../../" class="back-link" style="display:none;" id="backLink">
+        ← Portfolio
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-inner">
+      <div class="hero-badge">🔥 Authentic Charcoal Grill · St. Albert, Alberta</div>
+      <h1>Crazy<br><span class="accent">Inasal</span></h1>
+      <p class="hero-tagline">The Taste of Bacolod, Right Here in Alberta</p>
+      <p class="hero-sub">
+        Slow-marinated Filipino charcoal-grilled chicken and sizzling classics. Made fresh daily, basted in native annatto oil, served with love.
+      </p>
+      <div class="hero-ctas">
+        <button class="btn-cta-primary" onclick="document.getElementById('menu').scrollIntoView({behavior:'smooth'})">Order Online Now</button>
+        <button class="btn-cta-secondary" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">Our Story</button>
+      </div>
+      <div class="hero-info">
+        <div class="hero-info-item"><span class="hero-emoji">📍</span> 506 St Albert Trail, Suite 106</div>
+        <div class="hero-info-item"><span class="hero-emoji">⏰</span> Mon–Sun: 11AM – 9PM</div>
+        <div class="hero-info-item"><span class="hero-emoji">📞</span> (780) 555-0186</div>
+      </div>
+    </div>
+    <div class="hero-flame">🍗</div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about-strip" id="about">
+    <div class="about-inner">
+      <div>
+        <div class="about-eyebrow">Our Story</div>
+        <h2 class="about-title">Bacolod Tradition, Edmonton Proud</h2>
+        <p class="about-text">
+          Crazy Inasal brings the legendary charcoal-grilled chicken of Bacolod City straight to St. Albert. Every piece of chicken is marinated for 24 hours in our signature blend of lemongrass, calamansi, and native annatto oil before hitting the charcoal grill.
+        </p>
+        <p class="about-text">
+          We believe in simple ingredients, authentic technique, and the kind of food that makes you feel at home — no matter where home is.
+        </p>
+      </div>
+      <div class="about-highlights">
+        <div class="highlight">
+          <div class="highlight-icon">🔥</div>
+          <div class="highlight-title">Charcoal Grilled</div>
+          <div class="highlight-text">Traditional open-fire method for authentic smoky flavor</div>
+        </div>
+        <div class="highlight">
+          <div class="highlight-icon">⏱️</div>
+          <div class="highlight-title">24-Hour Marinade</div>
+          <div class="highlight-text">Our signature blend soaks deep for maximum flavor</div>
+        </div>
+        <div class="highlight">
+          <div class="highlight-icon">🌿</div>
+          <div class="highlight-title">Fresh Daily</div>
+          <div class="highlight-text">Prepared fresh every morning with quality ingredients</div>
+        </div>
+        <div class="highlight">
+          <div class="highlight-icon">🍋</div>
+          <div class="highlight-title">Native Annatto</div>
+          <div class="highlight-text">Hand-applied annatto oil baste for golden color and taste</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MENU -->
+  <section class="menu-section" id="menu">
+    <div class="menu-inner">
+      <div class="menu-header">
+        <div class="menu-eyebrow">Our Menu</div>
+        <h2 class="menu-title">Order Fresh, Eat Well</h2>
+        <p class="menu-sub">All platters include garlic rice, banana leaf, calamansi sauce & annatto baste.</p>
+      </div>
+      <div class="menu-cats">
+        <button class="cat-btn active" onclick="filterMenu('all', this)">All Items</button>
+        <button class="cat-btn" onclick="filterMenu('charcoal', this)">🍗 Charcoal Grill</button>
+        <button class="cat-btn" onclick="filterMenu('sizzling', this)">🍳 Sizzling Entrées</button>
+        <button class="cat-btn" onclick="filterMenu('extras', this)">🍚 Extras & Sides</button>
+      </div>
+      <div class="menu-grid" id="menuGrid"></div>
+      <div class="menu-note">
+        <strong>🍋 All Charcoal Platters Include:</strong> Fresh garlic rice · Hand-crimped saba banana leaf · Native calamansi sauce · Continuous annatto extract baste. Gluten-free options available — ask our staff.
+      </div>
+    </div>
+  </section>
+
+  <!-- LOCATION -->
+  <section class="location-section" id="location">
+    <div class="location-inner">
+      <div>
+        <div class="location-eyebrow">Find Us</div>
+        <h2 class="location-title">Visit Us in St. Albert</h2>
+        <div class="location-details">
+          <div class="location-item">
+            <span class="location-icon">📍</span>
+            <div>
+              <div class="location-label">Address</div>
+              <div class="location-value">506 St Albert Trail, Suite #106<br>St. Albert, Alberta, Canada</div>
+            </div>
+          </div>
+          <div class="location-item">
+            <span class="location-icon">⏰</span>
+            <div>
+              <div class="location-label">Hours</div>
+              <div class="location-value">Monday – Sunday: 11:00 AM – 9:00 PM</div>
+            </div>
+          </div>
+          <div class="location-item">
+            <span class="location-icon">📞</span>
+            <div>
+              <div class="location-label">Phone</div>
+              <div class="location-value"><a href="tel:7805550186">(780) 555-0186</a></div>
+            </div>
+          </div>
+          <div class="location-item">
+            <span class="location-icon">✉️</span>
+            <div>
+              <div class="location-label">Email</div>
+              <div class="location-value"><a href="mailto:orders@crazyinasal.ca">orders@crazyinasal.ca</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="map-placeholder">
+        <span>🗺️</span>
+        <p>506 St Albert Trail, Suite #106</p>
+        <small>St. Albert, Alberta</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-brand">Crazy <span>Inasal</span></div>
+    <div class="footer-sub">Authentic Bacolod Charcoal Grill · St. Albert, Alberta</div>
+    <a href="../../" class="footer-back">← Back to Portfolio</a>
+    <div class="footer-copy">© 2026 Crazy Inasal. All rights reserved.</div>
+  </footer>
+
+<script>
+  // ─── MENU DATA ───
+  const MENU = [
+    { id: 1, cat: 'charcoal', name: 'Paa Platter (Quarter Leg & Thigh)', price: 14.25, desc: 'Our bestseller. Juicy dark chicken marinated 24 hours and flame-grilled over charcoal. Rich, smoky, unforgettable.', emoji: '🍗' },
+    { id: 2, cat: 'charcoal', name: 'Pecho Platter (Quarter Breast & Wing)', price: 14.95, desc: 'Lean white breast basted perfectly with native annatto oil on the open grill. Light, flavorful, satisfying.', emoji: '🍗' },
+    { id: 3, cat: 'charcoal', name: 'Half Chicken Combo', price: 24.95, desc: 'Half a full chicken — breast, wing, leg, and thigh — with double garlic rice and extra sauces. Perfect to share.', emoji: '🍗' },
+    { id: 4, cat: 'sizzling', name: 'Sizzling Pork Sisig', price: 16.50, desc: 'Finely minced crispy pork with sweet onions, local peppers, and a bright splash of citrus. Served on a hot cast iron.', emoji: '🍳' },
+    { id: 5, cat: 'sizzling', name: 'Pancit Palabok Noodles', price: 12.95, desc: 'Glass noodles in golden shrimp sauce, finished with egg, toasted garlic, and crushed pork rinds. A Filipino classic.', emoji: '🍜' },
+    { id: 6, cat: 'sizzling', name: 'Sizzling Bangus (Milkfish)', price: 15.50, desc: 'Deboned milkfish marinated in vinegar and garlic, sizzled crispy and served with soy-calamansi dipping sauce.', emoji: '🐟' },
+    { id: 7, cat: 'extras', name: 'Garlic Rice (Extra)', price: 3.50, desc: 'Our signature sinangag — white rice fried with roasted garlic, green onions, and a touch of fish sauce.', emoji: '🍚' },
+    { id: 8, cat: 'extras', name: 'Annatto Sauce (Extra)', price: 2.00, desc: 'A small jar of our house-made native annatto baste for dipping and drizzling.', emoji: '🟡' },
+  ];
+
+  // ─── CART STATE ───
+  let cart = [];
+  let routeMode = 'pickup';
+  let paymentMode = 'cash';
+  let filterCat = 'all';
+
+  function renderMenu(cat) {
+    const grid = document.getElementById('menuGrid');
+    const items = cat === 'all' ? MENU : MENU.filter(m => m.cat === cat);
+    grid.innerHTML = items.map(item => `
+      <div class="menu-item" data-cat="${item.cat}">
+        <div>
+          <div class="menu-item-cat">${item.cat === 'charcoal' ? '🍗 Charcoal Grill' : item.cat === 'sizzling' ? '🍳 Sizzling Entrée' : '🍚 Extra & Side'}</div>
+          <div class="menu-item-name">${item.name}</div>
+          <div class="menu-item-desc">${item.desc}</div>
+        </div>
+        <div class="menu-item-right">
+          <div class="menu-price">$${item.price.toFixed(2)}</div>
+          <button class="add-btn" onclick="addToCart(${item.id})">+ Add</button>
+        </div>
+      </div>
+    `).join('');
+  }
+  renderMenu('all');
+
+  function filterMenu(cat, btn) {
+    filterCat = cat;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderMenu(cat);
+  }
+
+  // ─── CART FUNCTIONS ───
+  function addToCart(id) {
+    const item = MENU.find(m => m.id === id);
+    const existing = cart.find(c => c.id === id);
+    if (existing) { existing.qty++; } else { cart.push({ ...item, qty: 1 }); }
+    updateCartUI();
+    // Show cart briefly
+    const overlay = document.getElementById('cartOverlay');
+    const drawer = document.getElementById('cartDrawer');
+    overlay.classList.add('open');
+    drawer.classList.add('open');
+  }
+
+  function adjustQty(id, delta) {
+    const idx = cart.findIndex(c => c.id === id);
+    if (idx > -1) {
+      cart[idx].qty += delta;
+      if (cart[idx].qty <= 0) cart.splice(idx, 1);
+    }
+    updateCartUI();
+  }
+
+  function updateCartUI() {
+    const badge = document.getElementById('cartBadge');
+    const list = document.getElementById('cartItemsList');
+    const empty = document.getElementById('cartEmpty');
+    const footer = document.getElementById('cartFooter');
+    const total = cart.reduce((a, c) => a + c.price * c.qty, 0);
+    const delivery = routeMode === 'delivery' ? 4.50 : 0;
+    const tax = (total + delivery) * 0.05;
+    const grand = total + delivery + tax;
+    const totalQty = cart.reduce((a, c) => a + c.qty, 0);
+
+    badge.textContent = totalQty;
+    badge.style.display = totalQty > 0 ? 'flex' : 'none';
+
+    if (cart.length === 0) {
+      empty.style.display = 'block';
+      footer.style.display = 'none';
+      list.innerHTML = '';
+      list.appendChild(empty);
+    } else {
+      empty.style.display = 'none';
+      footer.style.display = 'block';
+      list.innerHTML = cart.map(c => `
+        <div class="cart-item">
+          <div>
+            <div class="cart-item-name">${c.name}</div>
+            <div class="cart-item-price">$${(c.price * c.qty).toFixed(2)}</div>
+          </div>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="adjustQty(${c.id}, -1)">−</button>
+            <span class="qty-num">${c.qty}</span>
+            <button class="qty-btn" onclick="adjustQty(${c.id}, 1)">+</button>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('cartSubtotal').textContent = '$' + total.toFixed(2);
+      document.getElementById('cartTax').textContent = '$' + tax.toFixed(2);
+      document.getElementById('cartTotal').textContent = '$' + grand.toFixed(2);
+      document.getElementById('deliveryLine').style.display = routeMode === 'delivery' ? 'flex' : 'none';
+    }
+    updateModalSummary();
+  }
+
+  function toggleCart() {
+    const overlay = document.getElementById('cartOverlay');
+    const drawer = document.getElementById('cartDrawer');
+    overlay.classList.toggle('open');
+    drawer.classList.toggle('open');
+  }
+
+  // ─── ORDER MODAL ───
+  function openOrderModal() {
+    toggleCart();
+    document.getElementById('orderModal').classList.add('open');
+    updateModalSummary();
+  }
+
+  function closeOrderModal() {
+    document.getElementById('orderModal').classList.remove('open');
+    document.getElementById('receiptBox').classList.remove('show');
+  }
+
+  function setRoute(mode) {
+    routeMode = mode;
+    document.getElementById('pickupBtn').classList.toggle('active', mode === 'pickup');
+    document.getElementById('deliveryBtn').classList.toggle('active', mode === 'delivery');
+    document.getElementById('addrField').classList.toggle('hidden', mode !== 'delivery');
+    if (mode === 'delivery') { paymentMode = 'online'; document.getElementById('cashBtn').classList.remove('active'); document.getElementById('onlineBtn').classList.add('active'); }
+    updateCartUI();
+  }
+
+  function setPayment(mode) {
+    paymentMode = mode;
+    document.getElementById('cashBtn').classList.toggle('active', mode === 'cash');
+    document.getElementById('onlineBtn').classList.toggle('active', mode === 'online');
+  }
+
+  function updateModalSummary() {
+    const total = cart.reduce((a, c) => a + c.price * c.qty, 0);
+    const delivery = routeMode === 'delivery' ? 4.50 : 0;
+    const tax = (total + delivery) * 0.05;
+    const grand = total + delivery + tax;
+    const el = document.getElementById('modalSummary');
+    if (!el) return;
+    el.innerHTML = `
+      <div class="modal-summary-line"><span>Subtotal</span><span>$${total.toFixed(2)}</span></div>
+      ${delivery > 0 ? `<div class="modal-summary-line"><span>Delivery Fee</span><span>$${delivery.toFixed(2)}</span></div>` : ''}
+      <div class="modal-summary-line"><span>GST (5%)</span><span>$${tax.toFixed(2)}</span></div>
+      <div class="modal-summary-total"><span>Total Due</span><span>$${grand.toFixed(2)}</span></div>
+    `;
+  }
+
+  function processOrder() {
+    const name = document.getElementById('custName').value.trim();
+    const phone = document.getElementById('custPhone').value.trim();
+    const email = document.getElementById('custEmail').value.trim();
+    const addr = document.getElementById('custAddr').value.trim();
+
+    if (cart.length === 0) { alert('Please add items to your order first.'); return; }
+    if (!name || !phone || !email) { alert('Please fill in your name, phone, and email.'); return; }
+    if (routeMode === 'delivery' && !addr) { alert('Please enter a delivery address.'); return; }
+
+    const total = cart.reduce((a, c) => a + c.price * c.qty, 0);
+    const delivery = routeMode === 'delivery' ? 4.50 : 0;
+    const tax = (total + delivery) * 0.05;
+    const grand = total + delivery + tax;
+    const orderId = 'CI-' + Math.floor(Math.random() * 899999 + 100000);
+    const now = new Date().toLocaleString();
+
+    const receiptHTML = `
+      <div class="receipt-header">
+        <div class="receipt-store">🍗 CRAZY INASAL</div>
+        <div class="receipt-addr">506 St Albert Trail, Suite 106 · St. Albert, AB</div>
+        <div class="receipt-addr" style="margin-top:4px;">Tel: (780) 555-0186</div>
+      </div>
+      <div class="receipt-line"><span><b>Order ID:</b></span><span>${orderId}</span></div>
+      <div class="receipt-line"><span><b>Date:</b></span><span>${now}</span></div>
+      <div class="receipt-line"><span><b>Customer:</b></span><span>${name}</span></div>
+      <div class="receipt-line"><span><b>Phone:</b></span><span>${phone}</span></div>
+      <div class="receipt-line"><span><b>Method:</b></span><span>${routeMode === 'delivery' ? `DELIVERY to ${addr}` : 'STORE PICKUP'}</span></div>
+      <div class="receipt-line"><span><b>Payment:</b></span><span>${paymentMode === 'cash' ? 'Cash / Card at Counter' : 'Online (Prepaid)'}</span></div>
+      <hr class="receipt-divider" />
+      ${cart.map(c => `<div class="receipt-line"><span>${c.qty}x ${c.name}</span><span>$${(c.price * c.qty).toFixed(2)}</span></div>`).join('')}
+      ${delivery > 0 ? `<div class="receipt-line"><span>Delivery Fee</span><span>$${delivery.toFixed(2)}</span></div>` : ''}
+      <div class="receipt-line"><span>GST (5%)</span><span>$${tax.toFixed(2)}</span></div>
+      <hr class="receipt-divider" />
+      <div class="receipt-total"><span>TOTAL PAID</span><span>$${grand.toFixed(2)}</span></div>
+      <div class="receipt-thank">Thank you for your order! Hand-basted in annatto oil with love. 🍋</div>
+    `;
+
+    const receiptBox = document.getElementById('receiptBox');
+    receiptBox.innerHTML = receiptHTML;
+    receiptBox.classList.add('show');
+    cart = [];
+    updateCartUI();
+
+    document.getElementById('custName').value = '';
+    document.getElementById('custPhone').value = '';
+    document.getElementById('custEmail').value = '';
+    document.getElementById('custAddr').value = '';
+  }
+
+  // Detect if opened from portfolio
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('from') === 'portfolio' || document.referrer.includes('emeerdreymendoza')) {
+    document.getElementById('backLink').style.display = 'flex';
+  }
+</script>
+</body>
+</html>

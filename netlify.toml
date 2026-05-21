@@ -1,0 +1,30 @@
+# Netlify Configuration for Emeer Drey Mendoza Portfolio
+# Deploy: Drag the contents of this folder to app.netlify.com/drop
+
+[build]
+  publish = "."
+
+# Redirect all paths to index.html for SPA-style navigation (not needed here, but safe to have)
+[[redirects]]
+  from = "/projects/crazy-inasal"
+  to = "/projects/crazy-inasal/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/projects/pharmahealth"
+  to = "/projects/pharmahealth/index.html"
+  status = 200
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache static assets
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
